@@ -306,9 +306,14 @@ func runBuild(dockerCli command.Cli, options buildOptions) error {
 
 	// read from a directory into tar archive
 	if buildCtx == nil {
-		excludes, err := build.ReadDockerignore(contextDir)
+		unescapedExcludes, err := build.ReadDockerignore(contextDir)
 		if err != nil {
 			return err
+		}
+
+		var excludes []string
+		for _, exclude := range unescapedExcludes {
+			excludes = append(excludes, regexp.QuoteMeta(exclude))
 		}
 
 		if err := build.ValidateContextDirectory(contextDir, excludes); err != nil {
